@@ -36,6 +36,7 @@ local Key = require "scripts.key"
 local key_img
 local Door = require "scripts.door"
 local door_img
+local DeathWall = require "scripts.death_wall"
 
 local controls_img
 
@@ -44,8 +45,9 @@ local wall = {
 }
 
 local twists = {
-    [1] = {"nothing", false},
-    [2] = {"door is you, key is win", true}
+    {"nothing", false},
+    {"door is you, key is win", true},
+    {"RED WALL OF DEATH", false},
 }
 
 local GM = Objects:new()
@@ -151,8 +153,10 @@ function GM:draw()
     
     love.graphics.setColor(rgb(236, 239, 244))
     if not self.fading_in then
-        love.graphics.print("twist:")
-        love.graphics.print(twists[self.index][1], 0, 60)
+        love.graphics.print("level "..self.index)
+
+        love.graphics.print("twist:", 0, 100)
+        love.graphics.print(twists[self.index][1], 0, 160)
     end
     
     love.graphics.pop()
@@ -174,6 +178,7 @@ function GM:keypressed(key)
 end
 
 function GM:check(a, filters)
+    local cols = {}
     if a.col then
         for _, b in ipairs(self.objects) do
             if b.col then
@@ -188,18 +193,20 @@ function GM:check(a, filters)
                 end
                 if not filtered then
                     if a ~= b and check_collision(a, b) then
-                        return b
+                        table.insert(cols, b)
                     end
                 end
             end
         end
     end
+    return cols
 end
 
 function GM:move_x(a, x, filters)
     a.x = a.x+x
-    local c = self:check(a, filters)
-    if c then
+    local cols = self:check(a, filters)
+    if #cols ~= 0 then
+        local c = cols[1]
         if x > 0 then
             a.x = c.x-a.w
         else
@@ -220,8 +227,9 @@ end
 
 function GM:move_y(a, y, filters)
     a.y = a.y+y
-    local c = self:check(a, filters)
-    if c then
+    local cols = self:check(a, filters)
+    if #cols ~= 0 then
+        local c = cols[1]
         if y > 0 then
             a.y = c.y-a.h
         else
@@ -272,6 +280,9 @@ function GM:load_level()
                 end
             end
         end
+    end
+    if self.index == 3 then
+        self:add(DeathWall)
     end
 end
 

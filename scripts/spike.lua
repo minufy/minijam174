@@ -23,12 +23,12 @@ function Spike:draw()
 end
 
 function Spike:update(dt)
-    local col = self.gm:check(self)
-    if col then
+    local cols = self.gm:check(self)
+    for i, col in ipairs(cols) do
         if col.tag == "player" then
             col:die()
-        end
-    end 
+        end 
+    end
 end
 
 return Spike

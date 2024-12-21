@@ -23,7 +23,7 @@ function Player:init(gm, x, y, img)
     
     self.w, self.h = self.img:getDimensions()
     
-    self.speed = 5
+    self.speed = 4.8
     self.air_speed_mult = 1.15
 
     self.jump_force = 13
