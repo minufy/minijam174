@@ -3,7 +3,7 @@ SCREEN_W, SCREEN_H = 1280, 720
 TILE_SIZE = 45
 MAP_SIZE = SCREEN_H
 
-function Init()    
+function Init()
     FONT = love.graphics.newFont("data/fonts/Galmuri9.ttf", 40)
 end
 

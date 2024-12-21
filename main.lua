@@ -25,10 +25,10 @@ function love.draw()
     love.graphics.clear()
     
     gm:draw()
-
+    
     love.graphics.setCanvas()
     love.graphics.setShader()
-
+    
     love.graphics.draw(canvas, 0, 0, 0, zoom, zoom)
 end
 

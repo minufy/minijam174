@@ -6,11 +6,13 @@ local function check_collision(a, b)
 end
 
 local function draw_background()
-    love.graphics.setBackgroundColor(rgb(236, 239, 244))
+    love.graphics.setBackgroundColor(0, 0, 0)
+    love.graphics.setColor(rgb(236, 239, 244))
+    love.graphics.rectangle("fill", 0, 0, MAP_SIZE, MAP_SIZE)
     local grid_size = TILE_SIZE*2
     local move = love.timer.getTime()*50%(2*grid_size)
     love.graphics.setLineWidth(grid_size/1.5)
-    love.graphics.setColor(1, 1, 1, 0.02)
+    love.graphics.setColor(1, 1, 1, 0.3)
     for i = -(4*grid_size), SCREEN_W, grid_size do
         love.graphics.line(i + move, 0, i + move + grid_size, SCREEN_H)
     end
@@ -20,8 +22,9 @@ local function ease_out(x)
     return 1 - (1 - x)^2
 end
 
-
 local Objects = require "objects"
+local Particle = require "scripts.particle"
+
 local Player = require "scripts.player"
 local player_img
 local Tile = require "scripts.tile"
@@ -33,6 +36,9 @@ local Key = require "scripts.key"
 local key_img
 local Door = require "scripts.door"
 local door_img
+
+local controls_img
+
 local wall = {
     tag = "wall"
 }
@@ -67,6 +73,7 @@ function GM:init()
     spike_img = love.graphics.newImage("data/imgs/spike.png")
     key_img = love.graphics.newImage("data/imgs/key.png")
     door_img = love.graphics.newImage("data/imgs/door.png")
+    controls_img = love.graphics.newImage("data/imgs/controls.png")
 
     self.objects = {}
     self.player = nil
@@ -80,6 +87,10 @@ function GM:init()
     self.fade_out_time = 20
     self.fade_out_timer = 0
     self.fading_out = false
+
+    self.shake_dur = 0
+    self.shake_x = 0
+    self.shake_y = 0
 end
 
 function GM:update(dt)
@@ -102,18 +113,37 @@ function GM:update(dt)
             self.fading_out = false
         end
     end
+
+    if self.shake_dur > 0.1 then
+        self.shake_x = math.random(-self.shake_dur, self.shake_dur)
+        self.shake_y = math.random(-self.shake_dur, self.shake_dur)
+    end
+    self.shake_dur = self.shake_dur + (0-self.shake_dur)/5*dt
 end
 
 function GM:draw()
+    -- shake
+
+    love.graphics.setColor(1, 1, 1)
+    if self.shake_dur > 0.1 then
+        love.graphics.translate(self.shake_x, self.shake_y)
+    end
+    
     draw_background()
     
     love.graphics.setColor(0, 0, 0)
     love.graphics.rectangle("fill", MAP_SIZE, 0, SCREEN_W-MAP_SIZE, SCREEN_H)
     love.graphics.setColor(1, 1, 1)
-    
+
     for _, object in ipairs(self.objects) do
         object:draw()
     end
+
+    if self.index == 1 and not self.player.has_key then
+        love.graphics.draw(controls_img, 40, 550, 0, 2, 2)
+    end
+
+    -- gui 
 
     love.graphics.setFont(FONT)
     love.graphics.push()
@@ -124,10 +154,12 @@ function GM:draw()
         love.graphics.print("twist:")
         love.graphics.print(twists[self.index][1], 0, 60)
     end
-
+    
     love.graphics.pop()
 
-    love.graphics.setColor(rgb(71, 87, 98))
+    -- fade in/out
+    
+    love.graphics.setColor(0, 0, 0)
     if self.fading_in then
         love.graphics.rectangle("fill", 0, 0, MAP_SIZE, ease_out(self.fade_in_timer/self.fade_in_time)*SCREEN_H)
     end
@@ -254,10 +286,17 @@ end
 
 function GM:key_obtained()
     self:add(Door, self.door_x, self.door_y, door_img)
+    for _ = 0, 5 do
+        self:add(Particle, self.door_x + TILE_SIZE/2, self.door_y + TILE_SIZE/2, {1, 1, 1, 0.8}, math.random(-10, 10), math.random(-10, 10), math.random(20, 30))
+    end
 end
 
 function GM:restart()
     self.fading_in = true
+end
+
+function GM:shake(dur)
+    self.shake_dur = dur
 end
 
 return GM

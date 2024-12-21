@@ -137,10 +137,13 @@ function Player:die()
     end
     self.gm:remove(self)
     self.gm:restart()
+    self.gm:shake(10)
 end
 
 function Player:grab_key()
+    self.has_key = true
     self.gm:key_obtained()
+    self.gm:shake(3)
 end
 
 return Player

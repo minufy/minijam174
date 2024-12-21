@@ -30,7 +30,7 @@ function Key:update(dt)
                 self.gm:add(Particle, self.x + self.w/2, self.y + self.h/2, {1, 1, 1, 0.8}, math.random(-10, 10), math.random(-10, 10), math.random(20, 30))
             end
         end
-    end 
+    end
 end
 
 return Key
