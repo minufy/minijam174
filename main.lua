@@ -36,7 +36,7 @@ end
 
 function love.update(dt)
     dt = dt*60
-    if dt > 1.1 then
+    if dt > 2 then
         return
     end
     gm:update(dt)

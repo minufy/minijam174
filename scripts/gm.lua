@@ -49,6 +49,9 @@ local twists = {
     {"door is you", true},
     {"floor is lava", false},
     {"spikes++", true},
+    {"smaller as you jump", false},
+    {"flip", false},
+    {"-gravity", true}
 }
 
 local sound_names = {{"death", 0.5}, {"jump", 0.5}, {"key", 0.5}, {"clear", 0.5}, {"woosh", 0.4}, {"walk", 0.2}, {"land", 0.5}}
@@ -173,7 +176,12 @@ function GM:draw()
         love.graphics.print("level "..self.index)
 
         love.graphics.print("twist:", 0, 100)
-        love.graphics.print(twists[self.index][1], 0, 160)
+        local text = twists[self.index][1]
+        if self.index == 6 then
+            love.graphics.print(text, FONT:getWidth(text), 160, 0, -1, 1)
+        else
+            love.graphics.print(text, 0, 160)
+        end
     end
     
     love.graphics.pop()
@@ -270,6 +278,11 @@ function GM:load_level()
     for y, row in ipairs(level) do
         for x = 1, #row do
             local px, py = (x - 1)*TILE_SIZE, (y - 1)*TILE_SIZE
+            if self.index == 6 then
+                x = #row - x + 1
+            elseif self.index == 7 then
+                py = py - TILE_SIZE
+            end
             local tile = row:sub(x, x)
             if tile == "x" then
                 if y ~= 1 and level[y - 1]:sub(x, x) ~= "x" then
@@ -300,7 +313,7 @@ function GM:load_level()
     end
     if self.index == 3 then
         self:add(Lava)
-    end
+    end 
 end
 
 function GM:next(x)

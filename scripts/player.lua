@@ -7,6 +7,8 @@ local base_gravity = 1.2
 
 local filters = {"key", "spike", "door"}
 
+local w, h
+
 function Player:init(gm, x, y, img)
     self.gm = gm
     self.tag = "player"
@@ -22,6 +24,7 @@ function Player:init(gm, x, y, img)
     self.max_vy = 18
     
     self.w, self.h = self.img:getDimensions()
+    w, h = self.w, self.h
     
     self.speed = 4.8
     self.air_speed_mult = 1.15
@@ -44,6 +47,10 @@ function Player:init(gm, x, y, img)
     self.particle_timer = 0
 
     self.landed = false
+
+    self.size = 1
+
+    self.g = 1
 end
 
 function Player:update(dt)
@@ -72,7 +79,7 @@ function Player:update(dt)
     if ix ~= 0 and self.falling < self.falling_thresh then
         if self.particle_timer > self.particle_time then
             self.particle_timer = 0
-            self.gm:add(Particle, self.x + self.w/2, self.y + self.h, {0.2, 0.2, 0.2, 0.8}, -ix*math.random(0, 10), math.random(-5, -1), math.random(5, 10))
+            self.gm:add(Particle, self.x + self.w/2, self.y + self.h/2 + self.h*self.g/2, {0.2, 0.2, 0.2, 0.8}, -ix*math.random(0, 10), math.random(-5, -1), math.random(5, 10))
             self.gm:play_sound("walk")
         end
         self.particle_timer = self.particle_timer + dt
@@ -85,10 +92,10 @@ function Player:update(dt)
     
     self.gm:move_x(self, self.mx*self.speed*air*dt, filters)
     
-    self.vy = self.vy+dt*self.gravity
+    self.vy = self.vy+dt*self.gravity*self.g
     
     if self.gm:move_y(self, self.vy*dt, filters) then
-        if self.vy > 0 then
+        if self.vy*self.g > 0 then
             self.falling = 0
         end
         self.vy = 0
@@ -97,9 +104,12 @@ function Player:update(dt)
     self.falling = self.falling+dt
     self.jump_buffer = self.jump_buffer+dt
 
-    if self.jump_buffer < self.jump_buffer_thresh then
-        if self.falling < self.falling_thresh then
-            self:jump()
+    if self.gm.index ~= 7 then
+        
+        if self.jump_buffer < self.jump_buffer_thresh then
+            if self.falling < self.falling_thresh then
+                self:jump()
+            end
         end
     end
 
@@ -120,7 +130,7 @@ function Player:update(dt)
 end
 
 function Player:draw()
-    love.graphics.draw(self.img, self.x, self.y)
+    love.graphics.draw(self.img, self.x, self.y, 0, self.size, self.size)
 end
 
 function Player:keypressed(key)
@@ -133,13 +143,28 @@ function Player:keypressed(key)
 end
 
 function Player:jump()
-    self.vy = -self.jump_force
-    self.falling = 999
-    self.jump_buffer = 999
-    for _ = 0, 2 do
-        self.gm:add(Particle, self.x + self.w/2, self.y + self.h/2, {1, 1, 1, 0.8}, math.random(-10, 10), math.random(0, 10), math.random(15, 20))
+    if self.gm.index == 7 then
+        self.g = -self.g
+    else
+        self.vy = -self.jump_force*self.g
+        self.falling = 999
+        self.jump_buffer = 999
+        for _ = 0, 2 do
+            self.gm:add(Particle, self.x + self.w/2, self.y + self.h/2, {1, 1, 1, 0.8}, math.random(-10, 10), math.random(0, 10), math.random(15, 20))
+        end
+        self.gm:play_sound("jump")
+    
+        if self.gm.index == 5 then
+            self.size = self.size - 0.2
+            if self.size < 0.2 then
+                self:die()
+            end
+            self.w = w*self.size
+            self.h = h*self.size
+            self.jump_force = self.jump_force + 3
+            self.speed = self.speed + 1
+        end
     end
-    self.gm:play_sound("jump")
 end
 
 function Player:die()
@@ -152,7 +177,7 @@ function Player:die()
     self.gm:play_sound("death")
 end
 
-function Player:grab_key()
+function Player:grab_key() 
     self.has_key = true
     self.gm:key_obtained()
     self.gm:shake(3)
