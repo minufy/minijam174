@@ -42,6 +42,8 @@ function Player:init(gm, x, y, img)
 
     self.particle_time = 5
     self.particle_timer = 0
+
+    self.landed = false
 end
 
 function Player:update(dt)
@@ -71,6 +73,7 @@ function Player:update(dt)
         if self.particle_timer > self.particle_time then
             self.particle_timer = 0
             self.gm:add(Particle, self.x + self.w/2, self.y + self.h, {0.2, 0.2, 0.2, 0.8}, -ix*math.random(0, 10), math.random(-5, -1), math.random(5, 10))
+            self.gm:play_sound("walk")
         end
         self.particle_timer = self.particle_timer + dt
     end
@@ -107,6 +110,13 @@ function Player:update(dt)
     end
 
     self.vy = math.min(self.vy, self.max_vy)
+
+    if self.falling < self.falling_thresh and not self.landed then
+        self.landed = true
+        self.gm:play_sound("land")
+    elseif self.falling > self.falling_thresh*2 then
+        self.landed = false
+    end
 end
 
 function Player:draw()
@@ -129,6 +139,7 @@ function Player:jump()
     for _ = 0, 2 do
         self.gm:add(Particle, self.x + self.w/2, self.y + self.h/2, {1, 1, 1, 0.8}, math.random(-10, 10), math.random(0, 10), math.random(15, 20))
     end
+    self.gm:play_sound("jump")
 end
 
 function Player:die()
@@ -138,12 +149,14 @@ function Player:die()
     self.gm:remove(self)
     self.gm:restart()
     self.gm:shake(10)
+    self.gm:play_sound("death")
 end
 
 function Player:grab_key()
     self.has_key = true
     self.gm:key_obtained()
     self.gm:shake(3)
+    self.gm:play_sound("key")
 end
 
 return Player

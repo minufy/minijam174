@@ -19,7 +19,9 @@ function Spike:init(gm, x, y, img)
 end
 
 function Spike:draw()
+    love.graphics.setColor(rgb(255, 89, 89))
     love.graphics.draw(self.img, self.x, self.y, 0, 1, 1, -spike_actual_size/2 + spike_size/2, -spike_actual_size + spike_size)
+    love.graphics.setColor(1, 1, 1)
 end
 
 function Spike:update(dt)

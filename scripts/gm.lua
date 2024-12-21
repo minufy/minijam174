@@ -36,7 +36,7 @@ local Key = require "scripts.key"
 local key_img
 local Door = require "scripts.door"
 local door_img
-local DeathWall = require "scripts.death_wall"
+local Lava = require "scripts.lava"
 
 local controls_img
 
@@ -47,8 +47,12 @@ local wall = {
 local twists = {
     {"nothing", false},
     {"door is you, key is win", true},
-    {"RED WALL OF DEATH", false},
+    {"floor is lava", false},
 }
+
+local sound_names = {{"death", 0.5}, {"jump", 0.5}, {"key", 0.5}, {"clear", 0.5}, {"woosh", 0.4}, {"walk", 0.2}, {"land", 0.5}}
+local sounds = {}
+local music
 
 local GM = Objects:new()
 
@@ -76,6 +80,16 @@ function GM:init()
     key_img = love.graphics.newImage("data/imgs/key.png")
     door_img = love.graphics.newImage("data/imgs/door.png")
     controls_img = love.graphics.newImage("data/imgs/controls.png")
+
+    for i, sound_name in ipairs(sound_names) do
+        sounds[sound_name[1]] = love.audio.newSource("data/audio/"..sound_name[1]..".ogg", "static")
+        sounds[sound_name[1]]:setVolume(sound_name[2])
+    end
+
+    music = love.audio.newSource("data/audio/music.ogg", "stream")
+    music:setVolume(0.2)
+    music:play()
+    music:setLooping(true)
 
     self.objects = {}
     self.player = nil
@@ -105,6 +119,7 @@ function GM:update(dt)
             self.fade_in_timer = 0
             self.fading_in = false
             self:load_level()
+            self:play_sound("woosh")
             self.fading_out = true
         end
     end
@@ -113,6 +128,7 @@ function GM:update(dt)
         if self.fade_out_timer > self.fade_out_time then
             self.fade_out_timer = 0
             self.fading_out = false
+            self:play_sound("woosh")
         end
     end
 
@@ -282,7 +298,7 @@ function GM:load_level()
         end
     end
     if self.index == 3 then
-        self:add(DeathWall)
+        self:add(Lava)
     end
 end
 
@@ -293,6 +309,7 @@ end
 function GM:clear()
     self:next(1)
     self.fading_in = true
+    self:play_sound("clear")
 end
 
 function GM:key_obtained()
@@ -308,6 +325,10 @@ end
 
 function GM:shake(dur)
     self.shake_dur = dur
+end
+
+function GM:play_sound(sound_name)
+    love.audio.play(sounds[sound_name])
 end
 
 return GM

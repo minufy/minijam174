@@ -1,10 +1,10 @@
 local Objects = require "objects"
 
-local DeathWall = Objects:new()
+local Lava = Objects:new()
 
 local speed = 1.65
 
-function DeathWall:init(gm)
+function Lava:init(gm)
     self.gm = gm
     self.tag = "spike"
     self.col = true
@@ -18,13 +18,13 @@ function DeathWall:init(gm)
     self.y = 20 + MAP_SIZE
 end
 
-function DeathWall:draw()
+function Lava:draw()
     love.graphics.setColor(rgb(255, 89, 89))
     love.graphics.rectangle("fill", self.x, self.y - 20, self.w, self.h)
     love.graphics.setColor(1, 1, 1)
 end
 
-function DeathWall:update(dt)
+function Lava:update(dt)
     self.delay_timer = self.delay_timer + dt
     if self.delay_timer > self.delay_time then
         self.y = self.y - speed*dt
@@ -37,4 +37,4 @@ function DeathWall:update(dt)
     end
 end
 
-return DeathWall
+return Lava

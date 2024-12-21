@@ -10,6 +10,8 @@ local shader
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    love.window.setTitle("minijam174")
+
     shader = love.graphics.newShader("data/key.glsl")
 
     Init()
