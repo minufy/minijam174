@@ -2,14 +2,14 @@ local Objects = require "objects"
 
 local Lava = Objects:new()
 
-local speed = 1.65
+local speed = 1.6
 
 function Lava:init(gm)
     self.gm = gm
     self.tag = "spike"
     self.col = true
     
-    self.delay_time = 25
+    self.delay_time = 30
     self.delay_timer = 0
 
     self.w = MAP_SIZE

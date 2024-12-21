@@ -12,7 +12,7 @@ local function draw_background()
     local grid_size = TILE_SIZE*2
     local move = love.timer.getTime()*50%(2*grid_size)
     love.graphics.setLineWidth(grid_size/1.5)
-    love.graphics.setColor(1, 1, 1, 0.3)
+    love.graphics.setColor(rgba(71, 87, 98, 0.05))
     for i = -(4*grid_size), SCREEN_W, grid_size do
         love.graphics.line(i + move, 0, i + move + grid_size, SCREEN_H)
     end
@@ -46,8 +46,9 @@ local wall = {
 
 local twists = {
     {"nothing", false},
-    {"door is you, key is win", true},
+    {"door is you", true},
     {"floor is lava", false},
+    {"spikes++", true},
 }
 
 local sound_names = {{"death", 0.5}, {"jump", 0.5}, {"key", 0.5}, {"clear", 0.5}, {"woosh", 0.4}, {"walk", 0.2}, {"land", 0.5}}
