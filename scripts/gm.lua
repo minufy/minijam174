@@ -380,7 +380,7 @@ function GM:draw_background()
     local grid_size = TILE_SIZE*2
     local move = love.timer.getTime()*50%(2*grid_size)
     love.graphics.setLineWidth(grid_size/1.5)
-    love.graphics.setColor(rgba(71, 87, 98, 0.05))
+    love.graphics.setColor(rgba(71, 87, 98, 0.1))
     for i = -(4*grid_size), SCREEN_W, grid_size do
         love.graphics.line(i + move, 0, i + move + grid_size, SCREEN_H)
     end

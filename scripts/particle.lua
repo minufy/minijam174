@@ -31,8 +31,8 @@ function Particle:update(dt)
     if self.size < 0.1 then
         self.gm:remove(self)
     end
-    self.x = self.x + self.vx
-    self.y = self.y + self.vy
+    self.x = self.x + self.vx*dt
+    self.y = self.y + self.vy*dt
 
     self.vx = self.vx + (0 - self.vx)/5*dt
     self.vy = self.vy + (0 - self.vy)/5*dt
