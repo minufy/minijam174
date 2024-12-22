@@ -29,7 +29,7 @@ local Lava = require "scripts.lava"
 local controls_img
 
 local wall = {
-    tag = "wall" 
+    tag = "wall"
 }
 
 local twists = {
