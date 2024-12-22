@@ -14,6 +14,8 @@ muted = not muted
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.window.setTitle("minijam174")
+    local icon = love.image.newImageData("data/imgs/icon.png")
+    love.window.setIcon(icon)
 
     shader = love.graphics.newShader("data/key.glsl")
 
