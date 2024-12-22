@@ -14,6 +14,10 @@ function Player:init(gm, x, y, img)
     self.tag = "player"
     self.col = true
 
+    if self.gm.index == 10 then
+        base_gravity = base_gravity/2.5
+    end
+
     self.img = img
     
     self.x = x
@@ -40,6 +44,10 @@ function Player:init(gm, x, y, img)
 
     self.acc = 5
     self.dec = 2
+    if self.gm.index == 8 then
+        self.acc = self.acc*6
+        self.dec = self.dec*6
+    end
 
     self.has_key = false
 
@@ -62,24 +70,29 @@ function Player:update(dt)
         ix = 1
     end
     
+    local wx = 0
+    if self.gm.index == 9 then
+        wx = -0.3
+    end
+
     if self.falling < self.falling_thresh then
         if ix ~= 0 then
-            self.mx = self.mx+(ix-self.mx)/self.acc*dt
+            self.mx = self.mx+(ix+wx-self.mx)/self.acc*dt
         else
-            self.mx = self.mx+(0-self.mx)/self.dec*dt
+            self.mx = self.mx+(wx-self.mx)/self.dec*dt
         end
     else
         if ix ~= 0 then
-            self.mx = self.mx+(ix-self.mx)/self.acc/2*dt
+            self.mx = self.mx+(ix+wx-self.mx)/self.acc/2*dt
         else
-            self.mx = self.mx+(0-self.mx)/self.dec/2*dt
+            self.mx = self.mx+(wx-self.mx)/self.dec/2*dt
         end
     end
 
     if ix ~= 0 and self.falling < self.falling_thresh then
         if self.particle_timer > self.particle_time then
             self.particle_timer = 0
-            self.gm:add(Particle, self.x + self.w/2, self.y + self.h/2 + self.h*self.g/2, {0.2, 0.2, 0.2, 0.8}, -ix*math.random(0, 10), math.random(-5, -1), math.random(5, 10))
+            self.gm:add(Particle, self.x + self.w/2, self.y + self.h/2 + self.h*self.g/2, rgba(71, 87, 98, 0.8), -ix*math.random(0, 10), math.random(-5, -1), math.random(5, 10))
             self.gm:play_sound("walk")
         end
         self.particle_timer = self.particle_timer + dt

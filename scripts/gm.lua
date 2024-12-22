@@ -5,19 +5,6 @@ local function check_collision(a, b)
             b.y < a.y+a.h
 end
 
-local function draw_background()
-    love.graphics.setBackgroundColor(0, 0, 0)
-    love.graphics.setColor(rgb(236, 239, 244))
-    love.graphics.rectangle("fill", 0, 0, MAP_SIZE, MAP_SIZE)
-    local grid_size = TILE_SIZE*2
-    local move = love.timer.getTime()*50%(2*grid_size)
-    love.graphics.setLineWidth(grid_size/1.5)
-    love.graphics.setColor(rgba(71, 87, 98, 0.05))
-    for i = -(4*grid_size), SCREEN_W, grid_size do
-        love.graphics.line(i + move, 0, i + move + grid_size, SCREEN_H)
-    end
-end
-
 local function ease_out(x)
     return 1 - (1 - x)^2
 end
@@ -30,6 +17,7 @@ local player_img
 local Tile = require "scripts.tile"
 local tile_img
 local tile_top_img
+local tile_top_ice_img
 local Spike = require "scripts.spike"
 local spike_img
 local Key = require "scripts.key"
@@ -41,7 +29,7 @@ local Lava = require "scripts.lava"
 local controls_img
 
 local wall = {
-    tag = "wall"
+    tag = "wall" 
 }
 
 local twists = {
@@ -51,7 +39,10 @@ local twists = {
     {"spikes++", true},
     {"smaller as you jump", false},
     {"flip", false},
-    {"-gravity", true}
+    {"-gravity", true},
+    {"ice", false},
+    {"wind", false},
+    {"moon gravity", false},
 }
 
 local sound_names = {{"death", 0.5}, {"jump", 0.5}, {"key", 0.5}, {"clear", 0.5}, {"woosh", 0.4}, {"walk", 0.2}, {"land", 0.5}}
@@ -80,6 +71,7 @@ function GM:init()
     player_img = love.graphics.newImage("data/imgs/player.png")
     tile_img = love.graphics.newImage("data/imgs/tile.png")
     tile_top_img = love.graphics.newImage("data/imgs/tile_top.png")
+    tile_top_ice_img = love.graphics.newImage("data/imgs/tile_top_ice.png")
     spike_img = love.graphics.newImage("data/imgs/spike.png")
     key_img = love.graphics.newImage("data/imgs/key.png")
     door_img = love.graphics.newImage("data/imgs/door.png")
@@ -96,6 +88,7 @@ function GM:init()
     music:setLooping(true)
 
     self.objects = {}
+    self.stars = {}
     self.player = nil
     self.index = 1
     self:load_level()
@@ -111,6 +104,11 @@ function GM:init()
     self.shake_dur = 0
     self.shake_x = 0
     self.shake_y = 0
+
+    self.wind_timer = 0
+    self.wind_time = 1
+
+    self.go_next = false
 end
 
 function GM:update(dt)
@@ -122,6 +120,10 @@ function GM:update(dt)
         if self.fade_in_timer > self.fade_in_time then
             self.fade_in_timer = 0
             self.fading_in = false
+            if self.go_next then
+                self:next()
+                self.go_next = false
+            end
             self:load_level()
             self:play_sound("woosh")
             self.fading_out = true
@@ -141,6 +143,14 @@ function GM:update(dt)
         self.shake_y = math.random(-self.shake_dur, self.shake_dur)
     end
     self.shake_dur = self.shake_dur + (0-self.shake_dur)/5*dt
+
+    if self.index == 9 then
+        self.wind_timer = self.wind_timer + dt
+        if self.wind_timer > self.wind_time then
+            self.wind_timer = 0
+            self:add(Particle, math.random(0, MAP_SIZE), math.random(0, MAP_SIZE), rgb(180, 187, 201), -math.random(50, 100), 0, math.random(10, 15))
+        end
+    end
 end
 
 function GM:draw()
@@ -150,13 +160,13 @@ function GM:draw()
     if self.shake_dur > 0.1 then
         love.graphics.translate(self.shake_x, self.shake_y)
     end
-    
-    draw_background()
-    
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.rectangle("fill", MAP_SIZE, 0, SCREEN_W-MAP_SIZE, SCREEN_H)
-    love.graphics.setColor(1, 1, 1)
+    if self.index == 10 then
+        self:draw_stars()
+    else
+        self:draw_background()
+    end
 
+    love.graphics.setColor(1, 1, 1)
     for _, object in ipairs(self.objects) do
         object:draw()
     end
@@ -166,6 +176,10 @@ function GM:draw()
     end
 
     -- gui 
+    
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.rectangle("fill", MAP_SIZE, 0, SCREEN_W-MAP_SIZE, SCREEN_H)
+    love.graphics.setColor(1, 1, 1)
 
     love.graphics.setFont(FONT)
     love.graphics.push()
@@ -286,7 +300,11 @@ function GM:load_level()
             local tile = row:sub(x, x)
             if tile == "x" then
                 if y ~= 1 and level[y - 1]:sub(x, x) ~= "x" then
-                    self:add(Tile, px, py, tile_top_img)
+                    if self.index == 8 then
+                        self:add(Tile, px, py, tile_top_ice_img)
+                    else
+                        self:add(Tile, px, py, tile_top_img)
+                    end
                 else
                     self:add(Tile, px, py, tile_img)
                 end
@@ -313,15 +331,20 @@ function GM:load_level()
     end
     if self.index == 3 then
         self:add(Lava)
+    elseif self.index == 10 then
+        for i = 1, 40 do
+            local star_pos = {math.random(0, MAP_SIZE), math.random(0, MAP_SIZE)}
+            table.insert(self.stars, star_pos)
+        end
     end 
 end
 
-function GM:next(x)
-    self.index = math.min(#twists, self.index + x)
+function GM:next()
+    self.index = math.min(#twists, self.index + 1)
 end
 
 function GM:clear()
-    self:next(1)
+    self.go_next = true
     self.fading_in = true
     self:play_sound("clear")
 end
@@ -343,6 +366,29 @@ end
 
 function GM:play_sound(sound_name)
     love.audio.play(sounds[sound_name])
+end
+
+function GM:draw_background()
+    love.graphics.setBackgroundColor(0, 0, 0)
+    love.graphics.setColor(rgb(236, 239, 244))
+    love.graphics.rectangle("fill", 0, 0, MAP_SIZE, MAP_SIZE)
+    local grid_size = TILE_SIZE*2
+    local move = love.timer.getTime()*50%(2*grid_size)
+    love.graphics.setLineWidth(grid_size/1.5)
+    love.graphics.setColor(rgba(71, 87, 98, 0.05))
+    for i = -(4*grid_size), SCREEN_W, grid_size do
+        love.graphics.line(i + move, 0, i + move + grid_size, SCREEN_H)
+    end
+end
+
+function GM:draw_stars()
+    love.graphics.setBackgroundColor(0, 0, 0)
+    love.graphics.setColor(rgb(24, 27, 29))
+    love.graphics.rectangle("fill", 0, 0, MAP_SIZE, MAP_SIZE)
+    love.graphics.setColor(rgb(236, 239, 244))
+    for i, star_pos in ipairs(self.stars) do
+        love.graphics.circle("fill", star_pos[1], star_pos[2], 1)
+    end
 end
 
 return GM
