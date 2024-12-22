@@ -384,6 +384,7 @@ function GM:draw_background()
     for i = -(4*grid_size), SCREEN_W, grid_size do
         love.graphics.line(i + move, 0, i + move + grid_size, SCREEN_H)
     end
+    love.graphics.setColor(1, 1, 1)
 end
 
 function GM:draw_stars()
