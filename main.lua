@@ -58,5 +58,5 @@ function love.keypressed(key)
 end
 
 function love.resize(w, h)
-    zoom = w/SCREEN_W
+    zoom = h/SCREEN_H
 end

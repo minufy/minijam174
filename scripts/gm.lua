@@ -43,6 +43,7 @@ local twists = {
     {"ice", false},
     {"wind", false},
     {"moon gravity", false},
+    {"end", true},
 }
 
 local sound_names = {{"death", 0.5}, {"jump", 0.5}, {"key", 0.5}, {"clear", 0.5}, {"woosh", 0.4}, {"walk", 0.2}, {"land", 0.5}}
@@ -187,14 +188,18 @@ function GM:draw()
     
     love.graphics.setColor(rgb(236, 239, 244))
     if not self.fading_in then
-        love.graphics.print("level "..self.index)
-
-        love.graphics.print("twist:", 0, 100)
-        local text = twists[self.index][1]
-        if self.index == 6 then
-            love.graphics.print(text, FONT:getWidth(text), 160, 0, -1, 1)
+        if self.index == 11 then
+            love.graphics.print("thank you for playing!")
         else
-            love.graphics.print(text, 0, 160)
+            love.graphics.print("level "..self.index)
+
+            love.graphics.print("twist:", 0, 100)
+            local text = twists[self.index][1]
+            if self.index == 6 then
+                love.graphics.print(text, FONT:getWidth(text), 160, 0, -1, 1)
+            else
+                love.graphics.print(text, 0, 160)
+            end
         end
     end
     

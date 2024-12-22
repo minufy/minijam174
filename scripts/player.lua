@@ -14,10 +14,6 @@ function Player:init(gm, x, y, img)
     self.tag = "player"
     self.col = true
 
-    if self.gm.index == 10 then
-        base_gravity = base_gravity/2.5
-    end
-
     self.img = img
     
     self.x = x
@@ -36,6 +32,9 @@ function Player:init(gm, x, y, img)
     self.jump_force = 13
     self.gravity = 0
     self.air_gravity_mult = 0.5
+    if self.gm.index == 10 then
+        self.air_gravity_mult = 0.6
+    end
 
     self.falling = 999
     self.falling_thresh = 5
@@ -126,10 +125,15 @@ function Player:update(dt)
         end
     end
 
+    local moon_gravity = 1
+    if self.gm.index == 10 then
+        moon_gravity = 2.6
+    end
+
     if love.keyboard.isDown("space") then
-        self.gravity = base_gravity*self.air_gravity_mult
+        self.gravity = base_gravity/moon_gravity*self.air_gravity_mult
     else
-        self.gravity = base_gravity
+        self.gravity = base_gravity/moon_gravity
     end
 
     self.vy = math.min(self.vy, self.max_vy)
