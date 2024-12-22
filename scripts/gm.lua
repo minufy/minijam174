@@ -97,7 +97,7 @@ function GM:init()
     self.fade_in_time = 30
     self.fade_in_timer = 0
     self.fading_in = false
-    
+
     self.fade_out_time = 20
     self.fade_out_timer = 0
     self.fading_out = false
