@@ -13,9 +13,6 @@ local muted = false
 muted = not muted
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
-    love.window.setTitle("minijam174")
-    local icon = love.image.newImageData("data/imgs/icon.png")
-    love.window.setIcon(icon)
 
     shader = love.graphics.newShader("data/key.glsl")
 
@@ -24,6 +21,9 @@ function love.load()
     canvas = love.graphics.newCanvas(SCREEN_W, SCREEN_H)
     gm = GM:new()
     gm:init()
+
+    local w, h = love.graphics.getDimensions()
+    zoom = h/SCREEN_H
 end
 
 function love.draw()
